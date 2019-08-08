@@ -1,0 +1,13 @@
+h1, h2 {
+    text-align: center;
+    color: white;
+}
+#header {
+    background-image: linear-gradient(navy, gray);
+}
+.table {
+    background-color: lightblue;
+}
+body {
+    margin: 10px;
+}
