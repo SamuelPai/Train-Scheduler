@@ -10,7 +10,6 @@
 // Initialize Firebase
 
 
-
 var firebaseConfig = {
     apiKey: "AIzaSyAT99og06rxoBdPV87Q3E5s2TH6dZXrzXE",
     authDomain: "train-scheduler-edd9f.firebaseapp.com",
@@ -34,7 +33,6 @@ $("#submit").on("click", function(event){
     var trainDestination = $("#first-Train").val().trim();
     var frequency1 = $("#frequency").val().trim();
 
-    $(".table").append("<tr>" + "<td>" + trainName + "</td>" + "<td>" + destination1 + "</td>" + "<td>" + trainDestination + "</td>" + "<td>" + frequency1 + "</td>" + "</tr>");
 
 
     var newTrain = {
@@ -56,7 +54,10 @@ alert("Train successfully added");
  $("#first-Train").val("");
  $("#frequency").val("");
 
+ var tMinutes;
+ var tArrival;
  trainData.ref().on("child_added", function(childSnapshot, prevChildKey){
+
     console.log(childSnapshot.val())
 
     // Store everything into a variable.
@@ -69,42 +70,33 @@ alert("Train successfully added");
 
     var time = tTrainDestination.split(":");
     var trainTime = moment().hours(time[0]).minutes(time[1]);
-    var maxMoment = moment.max(moment(),time);
+    var maxMoment = moment.max(moment(),trainTime);
+    
 
-    var tMinutes;
-    var tArrival;
- })
+    console.log("TEST!!!");
+    
 
+// If the first train is later than the current time, sent arrival to the first train time
+if (maxMoment === trainTime) {
+    tArrival = trainTime.format("hh:mm A");
+    tMinutes = trainTime.diff(moment(), "minutes");
+  } else {
+    // Calculate the minutes until arrival using hardcore math
+    // To calculate the minutes till arrival, take the current time in unix subtract the FirstTrain time
+    // and find the modulus between the difference and the frequency.
+    var differenceTimes = moment().diff(trainTime, "minutes");
+    var tRemainder = differenceTimes % tFrequency;
+    tMinutes = tFrequency - tRemainder;
+    // To calculate the arrival time, add the tMinutes to the current time
+    tArrival = moment()
+      .add(tMinutes, "m")
+      .format("hh:mm A");
+  }
+  console.log("tMinutes:", tMinutes);
+  console.log("tArrival:", tArrival);
 
- // If the first train is later than the current time, sent arrival to the first train time
- if (maxMoment === trainTime) {
-   tArrival = trainTime.format("hh:mm A");
-   tMinutes = trainTime.diff(moment(), "minutes");
- } else {
-   // Calculate the minutes until arrival using hardcore math
-   // To calculate the minutes till arrival, take the current time in unix subtract the FirstTrain time
-   // and find the modulus between the difference and the frequency.
-   var differenceTimes = moment().diff(trainTime, "minutes");
-   var tRemainder = differenceTimes % tFrequency;
-   tMinutes = tFrequency - tRemainder;
-   // To calculate the arrival time, add the tMinutes to the current time
-   tArrival = moment()
-     .add(tMinutes, "m")
-     .format("hh:mm A");
- }
- console.log("tMinutes:", tMinutes);
- console.log("tArrival:", tArrival);
-
- // Add each train's data into the table
-//  $(".table").append(
-//    $("<tr>").append(
-//      $("<td>").text(tName),
-//      $("<td>").text(tDestination1),
-//      $("<td>").text(tFrequency),
-//      $("<td>").text(tTrainDestination),
-//      $("<td>").text(tfrequency1)
-//    )
-//  );
+    });
+    $(".table").append("<tr>" + "<td>" + trainName + "</td>" + "<td>" + destination1 + "</td>" + "<td>" + frequency1 + "</td>" + "<td>" + tArrival + "</td>" + "<td>" + tMinutes + "<td>" + "</tr>");
 
 
 })
